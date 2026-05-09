@@ -1,18 +1,46 @@
 const moduleName = "disposition-initiative";
+const selectionGroupFlag = "selectionGroup";
+const selectionGroupNumberFlag = "selectionGroupNumber";
+const selectionGroupColorFlag = "selectionGroupColor";
+const groupColors = [
+  "#c84c4c",
+  "#3f7fc5",
+  "#4f9d5d",
+  "#c99a2e",
+  "#8b62c7",
+  "#c8649f",
+  "#4aa6a6",
+  "#d06f3c",
+];
+
+function randomId() {
+  return (
+    globalThis.foundry?.utils?.randomID?.() ?? `${Date.now()}-${Math.random()}`
+  );
+}
+
+function getGroupColor(groupNumber) {
+  return groupColors[(groupNumber - 1) % groupColors.length];
+}
 
 /**
- * Return an array of unique decimals in {0.1 ... 0.9}.
+ * Return an array of unique decimals.
  * Keeps the original behavior and defaults.
  * @param {number} count
  * @returns {number[]}
  */
 function getUniqueRandomDecimals(count = 5) {
-  const nums = new Set();
-  while (nums.size < count) {
-    const digit = Math.floor(Math.random() * 9) + 1; // 1..9
-    nums.add(digit / 10); // 0.1..0.9
+  const decimals = [];
+
+  for (let digit = 1; digit <= 9 && decimals.length < count; digit++) {
+    decimals.push(digit / 10);
   }
-  return Array.from(nums);
+
+  for (let digit = 1; decimals.length < count; digit++) {
+    decimals.push(digit / 1000);
+  }
+
+  return decimals.sort(() => Math.random() - 0.5);
 }
 
 /**
@@ -21,9 +49,10 @@ function getUniqueRandomDecimals(count = 5) {
  * @returns {number[]}
  */
 function getUniqueIntraGroupDecimals(count) {
-  const availableDigits = [...Array(9).keys()].map((i) => i + 1);
+  const precision = count <= 9 ? 100 : 10000;
+  const availableDigits = [...Array(count).keys()].map((i) => i + 1);
   const shuffled = [...availableDigits].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count).map((digit) => digit / 100);
+  return shuffled.slice(0, count).map((digit) => digit / precision);
 }
 
 /** Random pick from a non-empty array */
@@ -41,19 +70,37 @@ async function ensureCombatant(token) {
 /** Safely add decimals without floating point precision issues */
 function safeDecimalAdd(base, decimal1, decimal2 = 0) {
   const total =
-    Math.round(base * 100) +
-    Math.round(decimal1 * 100) +
-    Math.round(decimal2 * 100);
-  return total / 100;
+    Math.round(base * 10000) +
+    Math.round(decimal1 * 10000) +
+    Math.round(decimal2 * 10000);
+  return total / 10000;
 }
 
 export default class DispInit {
+  async clearSelectionGroups() {
+    if (!game.user.isGM || !game.combat) return;
+
+    const updates = game.combat.combatants.map((combatant) => ({
+      _id: combatant.id,
+      [`flags.${moduleName}.${selectionGroupFlag}`]: null,
+      [`flags.${moduleName}.${selectionGroupNumberFlag}`]: null,
+      [`flags.${moduleName}.${selectionGroupColorFlag}`]: null,
+    }));
+
+    if (updates.length) {
+      await game.combat.updateEmbeddedDocuments("Combatant", updates);
+    }
+  }
+
   async groupInitiative({ reroll = false } = {}) {
     if (!game.user.isGM) return;
 
-    const groupTieBreakers = getUniqueRandomDecimals();
     let tokens = [];
     const combats = game.combats.filter((combat) => combat.active);
+    const canvasTokens = canvas.tokens.controlled.map(
+      (token) => token.document,
+    );
+    const hasManualSelection = !reroll && canvasTokens.length > 0;
 
     if (combats && combats.length) {
       const combat = combats[0];
@@ -65,16 +112,12 @@ export default class DispInit {
         (c) => c.initiative !== null,
       );
 
-      if (alreadyRolled && !reroll) return;
+      if (alreadyRolled && !reroll && !hasManualSelection) return;
 
       tokens = [...combatTokens];
     }
 
-    const canvasTokens = canvas.tokens.controlled.map(
-      (token) => token.document,
-    );
-
-    if (!tokens.length) {
+    if (hasManualSelection || !tokens.length) {
       tokens = [...canvasTokens];
     }
 
@@ -84,14 +127,6 @@ export default class DispInit {
         permanent: true,
       });
     }
-
-    const groups = {
-      players: [],
-      friendly: [],
-      neutral: [],
-      hostile: [],
-      secret: [],
-    };
 
     const useInitiativeTiebreaking = game.settings.get(
       moduleName,
@@ -103,41 +138,122 @@ export default class DispInit {
       "groupPlayersToFriendlyTokens",
     );
 
-    const { FRIENDLY, NEUTRAL, HOSTILE, SECRET } = CONST.TOKEN_DISPOSITIONS;
+    const buildDispositionGroups = (groupTokens) => {
+      const groups = {
+        players: [],
+        friendly: [],
+        neutral: [],
+        hostile: [],
+        secret: [],
+      };
 
-    // Separate tokens into groups (preserving the original logic)
-    for (const token of tokens) {
-      if (token?.hasPlayerOwner === true) {
-        if (groupPlayersToFriendlyTokens) {
-          groups.friendly.push(token);
-        } else {
-          groups.players.push(token);
-        }
-      } else {
-        const disp = token?.disposition;
+      const { FRIENDLY, NEUTRAL, HOSTILE, SECRET } = CONST.TOKEN_DISPOSITIONS;
 
-        switch (disp) {
-          case FRIENDLY:
+      // Separate tokens into groups (preserving the original logic)
+      for (const token of groupTokens) {
+        if (token?.hasPlayerOwner === true) {
+          if (groupPlayersToFriendlyTokens) {
             groups.friendly.push(token);
-            break;
-          case SECRET:
-            groups.secret.push(token);
-            break;
-          case HOSTILE:
-            groups.hostile.push(token);
-            break;
-          case NEUTRAL:
-            groups.neutral.push(token);
-            break;
-          // no default: unhandled dispositions are ignored (same behavior)
+          } else {
+            groups.players.push(token);
+          }
+        } else {
+          const disp = token?.disposition;
+
+          switch (disp) {
+            case FRIENDLY:
+              groups.friendly.push(token);
+              break;
+            case SECRET:
+              groups.secret.push(token);
+              break;
+            case HOSTILE:
+              groups.hostile.push(token);
+              break;
+            case NEUTRAL:
+              groups.neutral.push(token);
+              break;
+            // no default: unhandled dispositions are ignored (same behavior)
+          }
         }
       }
-    }
+
+      return Object.entries(groups)
+        .filter(([, group]) => group.length)
+        .map(([id, group]) => ({ id, tokens: group }));
+    };
+
+    const getSelectionGroupId = (token) =>
+      token?.combatant?.getFlag(moduleName, selectionGroupFlag);
+
+    const getNextSelectionGroupNumber = () => {
+      const combatants = game.combat?.combatants?.contents ?? [];
+      const numbers = combatants
+        .map((combatant) =>
+          Number(combatant.getFlag(moduleName, selectionGroupNumberFlag)),
+        )
+        .filter(Number.isInteger);
+
+      return numbers.length ? Math.max(...numbers) + 1 : 1;
+    };
+
+    const buildCombatGroups = () => {
+      if (hasManualSelection) {
+        const groupNumber = getNextSelectionGroupNumber();
+
+        return [
+          {
+            id: randomId(),
+            number: groupNumber,
+            color: getGroupColor(groupNumber),
+            persist: true,
+            tokens,
+          },
+        ];
+      }
+
+      const selectionGroups = new Map();
+      const dispositionTokens = [];
+
+      for (const token of tokens) {
+        const selectionGroupId = getSelectionGroupId(token);
+        if (selectionGroupId) {
+          if (!selectionGroups.has(selectionGroupId)) {
+            selectionGroups.set(selectionGroupId, []);
+          }
+          selectionGroups.get(selectionGroupId).push(token);
+        } else {
+          dispositionTokens.push(token);
+        }
+      }
+
+      return [
+        ...Array.from(selectionGroups, ([id, group]) => ({
+          id,
+          number: Number(
+            group[0]?.combatant?.getFlag(moduleName, selectionGroupNumberFlag),
+          ),
+          color: group[0]?.combatant?.getFlag(
+            moduleName,
+            selectionGroupColorFlag,
+          ),
+          tokens: group,
+        })),
+        ...buildDispositionGroups(dispositionTokens),
+      ];
+    };
+
+    const combatGroups = buildCombatGroups();
+    const groupTieBreakers = getUniqueRandomDecimals(combatGroups.length);
 
     // Process a token group with intra-group tie-breaking
     const processGroup = async (
       group,
       groupIndex,
+      groupId,
+      groupNumber,
+      groupColor,
+      persistGroup = false,
       useInitiativeTiebreaking = false,
     ) => {
       if (group.length === 0) return;
@@ -173,13 +289,30 @@ export default class DispInit {
           );
         }
 
-        await token.combatant.update({ initiative: finalInitiative });
+        const update = { initiative: finalInitiative };
+        if (persistGroup) {
+          update[`flags.${moduleName}.${selectionGroupFlag}`] = groupId;
+          update[`flags.${moduleName}.${selectionGroupNumberFlag}`] =
+            groupNumber;
+          update[`flags.${moduleName}.${selectionGroupColorFlag}`] =
+            groupColor;
+        }
+
+        await token.combatant.update(update);
       }
     };
 
-    for (const [index, group] of Object.values(groups).entries()) {
-      if (group.length) {
-        await processGroup(group, index, useInitiativeTiebreaking);
+    for (const [index, group] of combatGroups.entries()) {
+      if (group.tokens.length) {
+        await processGroup(
+          group.tokens,
+          index,
+          group.id,
+          group.number,
+          group.color,
+          group.persist,
+          useInitiativeTiebreaking,
+        );
       }
     }
 

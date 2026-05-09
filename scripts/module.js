@@ -1,6 +1,46 @@
 const moduleName = "disposition-initiative";
+const selectionGroupNumberFlag = "selectionGroupNumber";
+const selectionGroupColorFlag = "selectionGroupColor";
 
 import DispInit from "./DispInit.mjs";
+
+function renderGroupBadges(html) {
+  const combat = game.combat;
+  if (!combat) return;
+
+  html
+    .querySelectorAll(".disposition-initiative-group-badge")
+    .forEach((badge) => badge.remove());
+
+  for (const combatant of combat.combatants) {
+    const groupNumber = combatant.getFlag(
+      moduleName,
+      selectionGroupNumberFlag,
+    );
+    if (!groupNumber) continue;
+
+    const groupColor =
+      combatant.getFlag(moduleName, selectionGroupColorFlag) ?? "#777";
+    const row = html.querySelector(`[data-combatant-id="${combatant.id}"]`);
+    if (!row) continue;
+
+    const name =
+      row.querySelector(".token-name h4") ??
+      row.querySelector(".token-name") ??
+      row.querySelector(".name") ??
+      row;
+    const badge = document.createElement("span");
+    badge.className = "disposition-initiative-group-badge";
+    badge.style.setProperty("--disposition-initiative-group-color", groupColor);
+    badge.dataset.tooltip = game.i18n.format("DispInit.GroupBadgeTooltip", {
+      group: groupNumber,
+    });
+    badge.textContent = game.i18n.format("DispInit.GroupBadge", {
+      group: groupNumber,
+    });
+    name.append(badge);
+  }
+}
 
 Hooks.once("init", async function () {
   // Load API
@@ -78,18 +118,34 @@ Hooks.on("renderCombatTracker", (app, html) => {
   const selector = html.querySelector(
     "#combat > header > div > div.control-buttons.left.flexrow > button.inline-control.combat-control.icon.fa-solid.fa-users",
   );
+  const controls =
+    selector?.parentElement ??
+    html.querySelector("#combat header .control-buttons.left");
+  const buttons = `<button
+      data-tooltip="DispInit.ClearGroups"
+      class="clear-initiative-groups inline-control combat-control icon fa-solid fa-eraser">
+    </button>
+    <button
+      data-tooltip="DispInit.GroupInitiative"
+      class="group-initiative inline-control combat-control icon fa-solid fa-people-group">
+    </button>`;
 
-  selector.insertAdjacentHTML(
-    "beforebegin",
-    `<button
-        data-tooltip="DispInit.GroupInitiative" 
-        class="group-initiative inline-control combat-control icon fa-solid fa-people-group">
-      </button>`,
-  );
+  if (selector) {
+    selector.insertAdjacentHTML("beforebegin", buttons);
+  } else {
+    controls?.insertAdjacentHTML("beforeend", buttons);
+  }
 
-  html.querySelector(".group-initiative").addEventListener("click", (ev) => {
+  html.querySelector(".group-initiative")?.addEventListener("click", () => {
     window.game.dispInit.groupInitiative();
   });
+  html
+    .querySelector(".clear-initiative-groups")
+    ?.addEventListener("click", () => {
+      window.game.dispInit.clearSelectionGroups();
+    });
+
+  renderGroupBadges(html);
 });
 
 Hooks.on("updateCombat", async (combat, update) => {

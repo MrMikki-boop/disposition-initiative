@@ -1,6 +1,9 @@
 {
   "DispInit.Button.Title": "Инициатива по отношению",
+  "DispInit.ClearGroups": "Очистить группы инициативы",
   "DispInit.Error.NoSelectedToken": "Выберите все токены, которые будут участвовать в сцене боя. Предварительно создавать сцену боя не нужно.",
+  "DispInit.GroupBadge": "Группа {group}",
+  "DispInit.GroupBadgeTooltip": "Группа инициативы {group}",
   "DispInit.GroupInitiative": "Групповая инициатива",
   "DispInit.Settings.GroupPlayersToFriendlyTokens": "Группировать игроков с дружественными токенами",
   "DispInit.Settings.GroupPlayersToFriendlyTokensHint": "Если включено, игроки группируются вместе с дружественными токенами.",

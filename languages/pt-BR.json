@@ -1,6 +1,9 @@
 {
   "DispInit.Button.Title": "Iniciativa por Disposição",
+  "DispInit.ClearGroups": "Limpar Grupos de Iniciativa",
   "DispInit.Error.NoSelectedToken": "Selecione todos os tokens que farão parte do combate. Não é necessário criar o encontro previamente.",
+  "DispInit.GroupBadge": "Grupo {group}",
+  "DispInit.GroupBadgeTooltip": "Grupo de Iniciativa {group}",
   "DispInit.GroupInitiative": "Iniciativa em Grupo",
   "DispInit.Settings.GroupPlayersToFriendlyTokens": "Agrupar Jogadores com Tokens Amigáveis",
   "DispInit.Settings.GroupPlayersToFriendlyTokensHint": "Quando ativado, jogadores são agrupados junto com tokens amigáveis.",
