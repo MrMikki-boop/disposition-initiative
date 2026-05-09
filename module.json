@@ -1,0 +1,55 @@
+{
+  "id": "disposition-initiative",
+  "title": "Disposition Initiative",
+  "description": "Group initiative by token disposition. Roll initiative once per side (friendly, neutral, hostile and secret)",
+  "version": "0.4.2",
+  "library": "false",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "Luber",
+      "discord": "nightlybuild_",
+      "email": "luizrcb@gmail.com",
+      "url": "https://foundryvtt.com/community/luizbertoni"
+    }
+  ],
+  "relationships": {
+    "systems": [],
+    "requires": []
+  },
+  "esmodules": [
+    "scripts/module.js"
+  ],
+  "scripts": [
+    "scripts/lib/lib.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    },
+    {
+      "lang": "pt-BR",
+      "name": "Português Brasileiro",
+      "path": "languages/pt-BR.json"
+    },
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "languages/ru.json"
+    }
+  ],
+  "url": "https://github.com/luizrcb/disposition-initiative",
+  "bugs": "https://github.com/luizrcb/disposition-initiative/issues",
+  "manifest": "https://github.com/luizrcb/disposition-initiative/releases/latest/download/module.json",
+  "download": "https://github.com/luizrcb/disposition-initiative/releases/download/0.4.2/module.zip",
+  "license": "LICENSE",
+  "readme": "README.md"
+}

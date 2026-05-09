@@ -1,0 +1,11 @@
+{
+  "DispInit.Button.Title": "Инициатива по отношению",
+  "DispInit.Error.NoSelectedToken": "Выберите все токены, которые будут участвовать в сцене боя. Предварительно создавать сцену боя не нужно.",
+  "DispInit.GroupInitiative": "Групповая инициатива",
+  "DispInit.Settings.GroupPlayersToFriendlyTokens": "Группировать игроков с дружественными токенами",
+  "DispInit.Settings.GroupPlayersToFriendlyTokensHint": "Если включено, игроки группируются вместе с дружественными токенами.",
+  "DispInit.Settings.InitiativeTiebreak": "Использовать тай-брейк групповой инициативы",
+  "DispInit.Settings.InitiativeTiebreakHint": "Добавляет десятичное значение к броскам групповой инициативы.\nЗначения групповой инициативы никогда не будут полностью совпадать.",
+  "DispInit.Settings.RerollInitiativeEveryRound": "Перебрасывать инициативу каждый раунд",
+  "DispInit.Settings.RerollInitiativeEveryRoundHint": "Если включено, групповая инициатива будет перебрасываться в начале каждого нового раунда."
+}
