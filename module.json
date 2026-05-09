@@ -2,7 +2,7 @@
   "id": "disposition-initiative",
   "title": "Disposition Initiative",
   "description": "Group initiative by token disposition. Roll initiative once per side (friendly, neutral, hostile and secret)",
-  "version": "0.4.4",
+  "version": "1.0.0",
   "library": "false",
   "compatibility": {
     "minimum": "13",
@@ -14,6 +14,10 @@
       "discord": "nightlybuild_",
       "email": "luizrcb@gmail.com",
       "url": "https://foundryvtt.com/community/luizbertoni"
+    },
+    {
+      "name": "MaxKoffing",
+      "url": "https://github.com/MrMikki-boop"
     }
   ],
   "relationships": {
@@ -49,7 +53,7 @@
   "url": "https://github.com/MrMikki-boop/disposition-initiative",
   "bugs": "https://github.com/MrMikki-boop/disposition-initiative/issues",
   "manifest": "https://github.com/MrMikki-boop/disposition-initiative/releases/latest/download/module.json",
-  "download": "https://github.com/MrMikki-boop/disposition-initiative/releases/download/0.4.4/module.zip",
+  "download": "https://github.com/MrMikki-boop/disposition-initiative/releases/download/1.0.0/module.zip",
   "license": "LICENSE",
   "readme": "README.md"
 }
