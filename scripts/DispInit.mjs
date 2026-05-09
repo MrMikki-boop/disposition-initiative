@@ -186,6 +186,25 @@ export default class DispInit {
     const getSelectionGroupId = (token) =>
       token?.combatant?.getFlag(moduleName, selectionGroupFlag);
 
+    const getSelectionGroup = (groupId) => {
+      const combatants = game.combat?.combatants?.contents ?? [];
+      const group = combatants
+        .filter(
+          (combatant) =>
+            combatant.getFlag(moduleName, selectionGroupFlag) === groupId,
+        )
+        .map((combatant) => combatant.token)
+        .filter(Boolean);
+
+      const first = group[0]?.combatant;
+      return {
+        id: groupId,
+        number: Number(first?.getFlag(moduleName, selectionGroupNumberFlag)),
+        color: first?.getFlag(moduleName, selectionGroupColorFlag),
+        tokens: group,
+      };
+    };
+
     const getNextSelectionGroupNumber = () => {
       const combatants = game.combat?.combatants?.contents ?? [];
       const numbers = combatants
@@ -194,11 +213,38 @@ export default class DispInit {
         )
         .filter(Number.isInteger);
 
-      return numbers.length ? Math.max(...numbers) + 1 : 1;
+      const usedNumbers = new Set(numbers);
+      let groupNumber = 1;
+      while (usedNumbers.has(groupNumber)) groupNumber++;
+
+      return groupNumber;
     };
 
     const buildCombatGroups = () => {
       if (hasManualSelection) {
+        const selectedTokenIds = new Set(tokens.map((token) => token.id));
+        const selectedGroupIds = new Set(
+          tokens
+            .map((token) => getSelectionGroupId(token))
+            .filter((groupId) => groupId),
+        );
+
+        if (selectedGroupIds.size === 1 && tokens.length) {
+          const existingGroup = getSelectionGroup(
+            Array.from(selectedGroupIds)[0],
+          );
+          const existingTokenIds = new Set(
+            existingGroup.tokens.map((token) => token.id),
+          );
+          const isSameSelection =
+            selectedTokenIds.size === existingTokenIds.size &&
+            Array.from(selectedTokenIds).every((id) =>
+              existingTokenIds.has(id),
+            );
+
+          if (isSameSelection) return [existingGroup];
+        }
+
         const groupNumber = getNextSelectionGroupNumber();
 
         return [

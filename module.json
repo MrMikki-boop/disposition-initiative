@@ -2,7 +2,7 @@
   "id": "disposition-initiative",
   "title": "Disposition Initiative",
   "description": "Group initiative by token disposition. Roll initiative once per side (friendly, neutral, hostile and secret)",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "library": "false",
   "compatibility": {
     "minimum": "13",
@@ -46,10 +46,10 @@
       "path": "languages/ru.json"
     }
   ],
-  "url": "https://github.com/luizrcb/disposition-initiative",
-  "bugs": "https://github.com/luizrcb/disposition-initiative/issues",
-  "manifest": "https://github.com/luizrcb/disposition-initiative/releases/latest/download/module.json",
-  "download": "https://github.com/luizrcb/disposition-initiative/releases/download/0.4.3/module.zip",
+  "url": "https://github.com/MrMikki-boop/disposition-initiative",
+  "bugs": "https://github.com/MrMikki-boop/disposition-initiative/issues",
+  "manifest": "https://github.com/MrMikki-boop/disposition-initiative/releases/latest/download/module.json",
+  "download": "https://github.com/MrMikki-boop/disposition-initiative/releases/download/0.4.4/module.zip",
   "license": "LICENSE",
   "readme": "README.md"
 }

@@ -1,8 +1,22 @@
 const moduleName = "disposition-initiative";
 const selectionGroupNumberFlag = "selectionGroupNumber";
 const selectionGroupColorFlag = "selectionGroupColor";
+const groupColors = [
+  "#c84c4c",
+  "#3f7fc5",
+  "#4f9d5d",
+  "#c99a2e",
+  "#8b62c7",
+  "#c8649f",
+  "#4aa6a6",
+  "#d06f3c",
+];
 
 import DispInit from "./DispInit.mjs";
+
+function getGroupColor(groupNumber) {
+  return groupColors[(Number(groupNumber) - 1) % groupColors.length];
+}
 
 function renderGroupBadges(html) {
   const combat = game.combat;
@@ -20,7 +34,9 @@ function renderGroupBadges(html) {
     if (!groupNumber) continue;
 
     const groupColor =
-      combatant.getFlag(moduleName, selectionGroupColorFlag) ?? "#777";
+      combatant.getFlag(moduleName, selectionGroupColorFlag) ??
+      getGroupColor(groupNumber) ??
+      "#777";
     const row = html.querySelector(`[data-combatant-id="${combatant.id}"]`);
     if (!row) continue;
 
