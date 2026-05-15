@@ -1,56 +1,78 @@
-<!--- Downloads @ Latest Badge -->
-<!--- replace <user>/<repo> with your username/repository -->
-<!--- ![Latest Release Download Count](https://img.shields.io/github/downloads/luizrcb/disposition-initiative/latest/module.zip) -->
-
-<!--- Forge Bazaar Install % Badge -->
-<!--- replace <your-module-name> with the `name` in your manifest -->
-<!--- ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2F<your-module-name>&colorB=4aa94a) -->
-
 # FoundryVTT Disposition Initiative
 
-![](https://img.shields.io/badge/Foundry-v13-informational) ![GitHub downloads](https://img.shields.io/github/downloads/luizrcb/disposition-initiative/total?label=Downloads) ![GitHub downloads Latest](https://img.shields.io/github/downloads/luizrcb/disposition-initiative/latest/total?label=Downloads%20Latest%20Release) [![Report Bugs](https://img.shields.io/badge/Report%20Bugs%20on%20GitHub-2dba4e?logo=GitHub&amp;logoColor=white)](https://github.com/luizrcb/disposition-initiative/issues)
+![Foundry v13](https://img.shields.io/badge/Foundry-v13-informational)
+![GitHub downloads](https://img.shields.io/github/downloads/MrMikki-boop/disposition-initiative/total?label=Downloads)
+![GitHub downloads latest](https://img.shields.io/github/downloads/MrMikki-boop/disposition-initiative/latest/total?label=Downloads%20Latest%20Release)
+[![Report bugs on GitHub](https://img.shields.io/badge/Report%20Bugs%20on%20GitHub-2dba4e?logo=GitHub&logoColor=white)](https://github.com/MrMikki-boop/disposition-initiative/issues)
 
-## Overview
+Disposition Initiative is a Foundry VTT module for running group initiative in D&D 5e. It can roll once for a selected group of tokens, apply that initiative to the whole group, and keep separate initiative groups inside the same encounter.
 
-Disposition Initiative is a Foundry VTT module that simplifies initiative rolls by letting one token roll for an entire side. Instead of every token rolling separately, the module randomly selects a representative from each disposition group — friendly, neutral, secret, or hostile — and uses that single roll for the whole group.
-
-This keeps combat moving quickly, especially in larger encounters, while still keeping things fair and dynamic.
+This fork adds selection-based initiative groups, Russian localization, and Foundry VTT v13 / D&D 5e 5.3.x-oriented workflow tweaks.
 
 ## Features
 
-- Automatically groups tokens by their disposition (friendly, neutral, secret, and hostile).  
-- Randomly selects a token from each group to roll initiative.  
-- Applies the result to all tokens in that group.  
-- Module setting to reroll group initiatives at the start of each new round.  
-- Module setting to choose whether players are grouped with friendly tokens.  
-- Lightweight and easy to use — no extra setup required.  
+- Create initiative groups from selected tokens.
+- Re-roll the same group by selecting the exact same set of tokens again.
+- Create a new group by selecting a new set of tokens, including a subset of an existing group.
+- Keep group numbers stable; new groups use the first available number.
+- Show compact group badges in the combat tracker.
+- Fall back to disposition grouping for tokens without selection groups.
+- Optionally group player-owned tokens with friendly tokens.
+- Optionally re-roll group initiative at the start of each new round.
+- Russian, English, and Brazilian Portuguese localization.
 
-## How To
+## How Selection Groups Work
 
-1. Select all tokens you want to roll initiative for. You don’t need to create the encounter beforehand.  
-   - If the encounter is already created and tokens have been added to the combat tracker, you don’t need to select them on the scene canvas.  
-2. Click the **Disposition Initiative** button in the Token Controls menu (or press the `g` shortcut key — note that this shortcut won’t work once the active encounter has already started).  
+1. Select the tokens you want to act as one initiative group.
+2. Click the **Group Initiative** button in the Token Controls menu or in the Combat Tracker.
+3. The selected tokens receive one shared group roll, with small decimal tie-breakers when enabled.
+4. Select the exact same set again to re-roll that group without changing its group number.
+5. Select a different set to create a new group.
 
-## Changelog
+Example:
 
-You can see changes at [CHANGELOG](CHANGELOG.md).
+- Select four goblins: they become `Group 1`.
+- Select the same four goblins again: `Group 1` is re-rolled.
+- Select two of those goblins: those two become a new group.
+- Select the whole combat after several groups exist: existing groups stay separate.
 
-## Instalation
+## Buttons
 
-You can use one of the following installation methods:
+- **Group Initiative**: rolls initiative for the selected group or existing combat groups.
+- **Clear Initiative Groups**: clears stored group flags for the current combat.
 
-1. Pasting the following url into the **Install Module** dialog on the Setup menu of the application.
-##
-    https://github.com/luizrcb/disposition-initiative/releases/latest/download/module.json
-2. Browsing the repository's [Releases](https://github.com/luizrcb/disposition-initiative/releases) page, where you can copy any module.json link for use in the Install Module dialog.
-3. Downloading one of the .zip archives from the Releases page and extracting it into your foundry Data folder, under `Data/modules/disposition-initiative`.
+## Settings
 
-## Community
+- **Use Group Initiative Tiebreaker**: adds decimal tie-breakers so grouped combatants do not have identical initiative values.
+- **Group Players with Friendly Tokens**: includes player-owned tokens in the friendly group when using disposition fallback.
+- **Reroll Initiatives Every Round**: re-rolls group initiatives at the start of each new round.
 
-- Do you have something to improve this module? [Share it!](https://github.com/luizrcb/disposition-initiative/issues)
-- Do you find out a bug? [Report it!](https://github.com/luizrcb/disposition-initiative/issues)
+## Installation
+
+Paste this manifest URL into Foundry VTT's **Install Module** dialog:
+
+```text
+https://github.com/MrMikki-boop/disposition-initiative/releases/latest/download/module.json
+```
+
+You can also download a release archive from:
+
+```text
+https://github.com/MrMikki-boop/disposition-initiative/releases
+```
+
+## Compatibility
+
+- Foundry VTT: v13
+- Target workflow: Dungeons & Dragons Fifth Edition 5.3.x
+
+## Credits
+
+Original module by Luiz Bertoni.
+
+Fork maintenance and selection-group workflow by MaxKoffing.
 
 ## Licenses
 
-- **Source Code:** All source code files (javascript, css) are licensed under the [MIT License](https://en.wikipedia.org/wiki/MIT_License).
-- **Foundry VTT:** The project is created following the Foundry VTT [Limited License Agreement for module development](https://foundryvtt.com/article/license/).
+- **Source code:** MIT License. See [LICENSE](LICENSE).
+- **Foundry VTT:** This project follows the Foundry VTT Limited License Agreement for module development.
