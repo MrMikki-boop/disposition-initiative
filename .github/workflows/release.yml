@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p dist
           cp module.json dist/module.json
-          zip -r dist/midi-locale-fix.zip \
+          zip -r dist/disposition-initiative.zip \
             module.json \
             README.md \
             LICENSE \
@@ -62,4 +62,4 @@ jobs:
         with:
           files: |
             dist/module.json
-            dist/midi-locale-fix.zip
+            dist/disposition-initiative.zip
