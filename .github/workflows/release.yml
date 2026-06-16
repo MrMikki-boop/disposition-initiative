@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "22"
 
       - name: Validate release metadata
         run: |
@@ -63,3 +63,5 @@ jobs:
           files: |
             dist/module.json
             dist/disposition-initiative.zip
+          fail_on_unmatched_files: true
+          generate_release_notes: true
