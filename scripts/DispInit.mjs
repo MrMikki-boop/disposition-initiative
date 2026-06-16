@@ -60,6 +60,39 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function toNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function getInitiativeBonus(token) {
+  const actor = token?.actor;
+  const init = actor?.system?.attributes?.init;
+  const dex = actor?.system?.abilities?.dex;
+  const candidates = [
+    init?.total,
+    init?.mod,
+    init?.bonus,
+    init?.value,
+    dex?.mod,
+  ];
+
+  for (const candidate of candidates) {
+    const number = toNumber(candidate);
+    if (number !== null) return number;
+  }
+
+  return 0;
+}
+
+function getPassiveInitiative(token) {
+  return 10 + getInitiativeBonus(token);
+}
+
+function isPlayerOwned(token) {
+  return token?.hasPlayerOwner === true || token?.actor?.hasPlayerOwner === true;
+}
+
 /** Ensure a token has a combatant (preserves original API usage) */
 async function ensureCombatant(token) {
   if (!token.combatant) {
@@ -138,6 +171,13 @@ export default class DispInit {
       "groupPlayersToFriendlyTokens",
     );
 
+    const initiativeRollMode = game.settings.get(
+      moduleName,
+      "initiativeRollMode",
+    );
+
+    const groupingMode = game.settings.get(moduleName, "groupingMode");
+
     const buildDispositionGroups = (groupTokens) => {
       const groups = {
         players: [],
@@ -183,6 +223,22 @@ export default class DispInit {
         .map(([id, group]) => ({ id, tokens: group }));
     };
 
+    const buildSameActorGroups = (groupTokens) => {
+      const groups = new Map();
+
+      for (const token of groupTokens) {
+        const actorKey = token?.actor?.id ?? token?.name ?? token?.id;
+        if (!actorKey) continue;
+        if (!groups.has(actorKey)) groups.set(actorKey, []);
+        groups.get(actorKey).push(token);
+      }
+
+      return Array.from(groups, ([id, group]) => ({
+        id,
+        tokens: group,
+      }));
+    };
+
     const getSelectionGroupId = (token) =>
       token?.combatant?.getFlag(moduleName, selectionGroupFlag);
 
@@ -221,6 +277,9 @@ export default class DispInit {
     };
 
     const buildCombatGroups = () => {
+      if (groupingMode === "disposition") return buildDispositionGroups(tokens);
+      if (groupingMode === "sameActor") return buildSameActorGroups(tokens);
+
       if (hasManualSelection) {
         const selectedTokenIds = new Set(tokens.map((token) => token.id));
         const selectedGroupIds = new Set(
@@ -292,6 +351,14 @@ export default class DispInit {
     const combatGroups = buildCombatGroups();
     const groupTieBreakers = getUniqueRandomDecimals(combatGroups.length);
 
+    const shouldUsePassiveInitiative = (group) => {
+      if (initiativeRollMode === "passive") return true;
+      if (initiativeRollMode === "passiveNPCs") {
+        return group.every((token) => !isPlayerOwned(token));
+      }
+      return false;
+    };
+
     // Process a token group with intra-group tie-breaking
     const processGroup = async (
       group,
@@ -307,9 +374,13 @@ export default class DispInit {
       const roller = pickRandom(group);
       await ensureCombatant(roller);
 
-      await game.combat.rollInitiative([roller.combatant.id]);
-
-      const baseInitiative = Math.floor(roller.combatant.initiative);
+      let baseInitiative;
+      if (shouldUsePassiveInitiative(group)) {
+        baseInitiative = getPassiveInitiative(roller);
+      } else {
+        await game.combat.rollInitiative([roller.combatant.id]);
+        baseInitiative = Math.floor(roller.combatant.initiative);
+      }
 
       const groupTieBreaker = useInitiativeTiebreaking
         ? groupTieBreakers[groupIndex]

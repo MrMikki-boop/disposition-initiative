@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate release metadata
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const manifest = JSON.parse(fs.readFileSync("module.json", "utf8"));
+          const tag = process.env.GITHUB_REF_NAME;
+          const versionTag = `v${manifest.version}`;
+          const expectedManifest = `https://github.com/MrMikki-boop/${manifest.id}/releases/latest/download/module.json`;
+          const expectedDownload = `https://github.com/MrMikki-boop/${manifest.id}/releases/download/${versionTag}/${manifest.id}.zip`;
+
+          if (tag !== versionTag) throw new Error(`Tag ${tag} does not match module.json version ${versionTag}.`);
+          if (manifest.manifest !== expectedManifest) throw new Error(`manifest URL should be ${expectedManifest}`);
+          if (manifest.download !== expectedDownload) {
+            throw new Error(`module.json download URL is ${manifest.download}; expected ${expectedDownload}`);
+          }
+
+          for (const language of manifest.languages ?? []) {
+            JSON.parse(fs.readFileSync(language.path, "utf8"));
+          }
+          NODE
+
+      - name: Check JavaScript syntax
+        run: |
+          find scripts -name "*.mjs" -print0 | xargs -0 -n 1 node --check
+
+      - name: Build Foundry release assets
+        run: |
+          mkdir -p dist
+          cp module.json dist/module.json
+          zip -r dist/midi-locale-fix.zip \
+            module.json \
+            README.md \
+            LICENSE \
+            scripts \
+            languages
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/module.json
+            dist/midi-locale-fix.zip

@@ -17,7 +17,10 @@ This fork adds selection-based initiative groups, Russian localization, and Foun
 - Keep group numbers stable; new groups use the first available number.
 - Show compact group badges in the combat tracker.
 - Fall back to disposition grouping for tokens without selection groups.
-- Optionally group player-owned tokens with friendly tokens.
+- Choose grouping mode: selection groups, token disposition, or same actor.
+- Choose initiative roll mode: normal rolls, passive initiative for everyone, or passive initiative for NPC groups.
+- Swap initiative values from the combat tracker context menu for Alert-style initiative exchange.
+- Optionally group player-owned tokens with friendly tokens when using disposition grouping.
 - Optionally re-roll group initiative at the start of each new round.
 - Russian, English, and Brazilian Portuguese localization.
 
@@ -40,12 +43,26 @@ Example:
 
 - **Group Initiative**: rolls initiative for the selected group or existing combat groups.
 - **Clear Initiative Groups**: clears stored group flags for the current combat.
+- **Swap Initiative**: available from a combatant context menu. The GM chooses another combatant and swaps their initiative values.
 
 ## Settings
 
 - **Use Group Initiative Tiebreaker**: adds decimal tie-breakers so grouped combatants do not have identical initiative values.
+- **Initiative Roll Mode**: chooses whether groups roll normally, use passive initiative for everyone, or use passive initiative only for NPC-only groups.
+- **Grouping Mode**: chooses whether groups are built from exact token selections, token disposition, or same actor.
 - **Group Players with Friendly Tokens**: includes player-owned tokens in the friendly group when using disposition fallback.
 - **Reroll Initiatives Every Round**: re-rolls group initiatives at the start of each new round.
+
+## Alert-Style Initiative Exchange
+
+D&D 2024 Alert allows a character to exchange initiative with a willing ally after initiative is rolled. The module does not try to detect the feat by item id or localized name. Instead, it gives the GM a controlled context-menu action:
+
+1. Right-click a combatant in the combat tracker.
+2. Choose **Swap Initiative**.
+3. Choose the target combatant.
+4. The two initiative values are exchanged.
+
+The action requires both combatants to already have initiative values. It blocks obvious incapacitated states when Foundry exposes those statuses on the actor or token.
 
 ## Installation
 
