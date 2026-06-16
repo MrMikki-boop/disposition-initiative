@@ -55,6 +55,7 @@ jobs:
             README.md \
             LICENSE \
             scripts \
+            styles \
             languages
 
       - name: Upload release assets
